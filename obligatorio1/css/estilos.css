@@ -1,0 +1,136 @@
+/* Autores: Ruben Derigo (287176) y Rodrigo Ferro (220348)*/
+
+* {
+	font-family: arial;
+}
+
+#tituloEvento {
+	background-image: url('../img/background-title.jpg');
+	color: white;
+	border-radius: 16px;
+}
+
+#tituloEvento h1 {
+	text-align: center;
+}
+
+
+.tituloSeccion {
+	background-color: #bdd47e;
+	text-align: center;
+	border-radius: 16px;
+}
+
+table, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+tr {
+	text-align: center;
+}
+
+
+#textoPresentacion{
+	width: 500px;
+}
+
+#horaPresentacion {
+	width: 150px;
+}
+
+#divTabla {
+	display: flex;
+	justify-content: center;
+	max-height: 200px;
+	overflow: scroll;
+}
+
+#divTabla table {
+	width: 80%;
+}
+
+.dia1 {
+	background-color: #fff000;
+}
+
+.dia2 {
+	background-color: #d7d350;
+}
+
+.dia3 {
+	background-color: #c2bd60;
+}
+
+.dia4 {
+	background-color: #ada86d;
+}
+
+.dia5 {
+	background-color: #989477;
+}
+
+#altasSeccion {
+	display: flex;
+}
+
+.divForm {
+	width: 50%;
+}
+
+#radioBtn {
+	display: flex;
+}
+
+#origenBtns {
+	margin-top: 40px;
+	display: flex;
+	flex-direction: column;
+}
+
+input {
+	width: 220px;
+}
+
+.btnFrom {
+	width: 250px;
+}
+
+#busquedaFrom{
+	display: inline-block;
+}
+
+#busquedaFrom #buscarBtn {
+	margin-left: 30px
+}
+
+
+.divForm form{
+	display: flex;
+	flex-direction: column;
+}
+
+.divFormInput {
+	display: flex;
+	gap: 10;
+}
+
+.divFormInput label {
+	width: 100px;
+}
+
+
+@media print {
+  .seccionAEsconder {
+	  display: none;
+  }
+  
+  #divTabla {
+	  max-height: 100%;
+	  overflow: auto;
+  }
+  
+  details {
+	  display: none;
+  }
+}
