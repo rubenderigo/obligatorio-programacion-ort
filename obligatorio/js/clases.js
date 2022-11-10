@@ -8,7 +8,15 @@ class Sistema {
 	}
 	
 	listarEmpresas() {
-		return this.empresas
+		return this.empresas;
+	}
+	
+	econtrarEmpresaPorNombre(nombre) {
+		for(const empresa of this.empresas) {
+			if(empresa.nombre === nombre) {
+				return empresa;
+			}
+		}
 	}
 }
 
