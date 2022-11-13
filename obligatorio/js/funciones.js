@@ -60,8 +60,19 @@ function altaPresentacion () {
 	if(exsitePresentacion) {
 		alert("Ya existe una presentacion con ese titulo.");
 	} else {
-		sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, dia.value, duracion.value));
-		titulo.value = "";
-		descripcion.value = "";
+		
+		const presentacionesDelMismoDia = sistema.listarPresentacionesPorDia(dia.value);
+		let cantidadMinutosReservados = 0;
+		for(const presentacion of presentacionesDelMismoDia) {
+			cantidadMinutosReservados += presentacion.duracion;
+		}
+		
+		if((cantidadMinutosReservados + parseInt(duracion.value)) <= maxMinutosPorDia) {
+			sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, parseInt(dia.value), parseInt(duracion.value)));
+			titulo.value = "";
+			descripcion.value = "";
+		} else {
+			alert("No queda disponibilidad el dia " + dia.value + " para la duracion " + duracion.value);
+		}
 	}
 }

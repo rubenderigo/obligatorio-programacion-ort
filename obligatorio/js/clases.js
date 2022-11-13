@@ -40,6 +40,16 @@ class Sistema {
 			}
 		}
 	}
+	
+	listarPresentacionesPorDia(dia) {
+		const presentaciones = [];
+		for(const presentacion of this.presentaciones){
+			if(presentacion.dia === dia) {
+				presentaciones.push(presentacion);
+			}
+		}
+		return presentaciones;
+	}
 }
 
 class Empresa {
