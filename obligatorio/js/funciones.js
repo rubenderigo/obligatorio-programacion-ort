@@ -5,11 +5,12 @@ const maxMinutosPorDia = 480;
 
 function inicio(){
 	sistema.agregarEmpresa(new Empresa("Globant", "Av. Italia 22", "092 231 123", "extranjera"));
-	sistema.agregarPresentacion(new Presentacion("Globant", "p5", "press tercero", "a", "5", "15"));
-	sistema.agregarPresentacion(new Presentacion("Globant", "p4", "press primero", "b", "1", "15"));
-	sistema.agregarPresentacion(new Presentacion("Globant", "p3", "press primero", "a", "1", "15"));
-	sistema.agregarPresentacion(new Presentacion("Globant", "p2", "press segunda segunda", "a", "2", "15"));
+	sistema.agregarPresentacion(new Presentacion("Globant", "p5", "tema", "1era presentacion del dia 1 de 30 minutos", 1, 30));
+	//sistema.agregarPresentacion(new Presentacion("Globant", "p4", "press primero", "b", "2", "15"));
+	//sistema.agregarPresentacion(new Presentacion("Globant", "p3", "press primero", "a", "2", "15"));
+	//sistema.agregarPresentacion(new Presentacion("Globant", "p2", "press segunda segunda", "a", "3", "15"));
 	actualizarEmpresasSelect();
+	actualizarTabla();
 	
 	document.getElementById("altaEmpresa").addEventListener("submit", altaEmpresa);
 	document.getElementById("altaPresentacion").addEventListener("submit", altaPresentacion);
@@ -52,7 +53,7 @@ function actualizarEmpresasSelect() {
 	}
 }
 
-function altaPresentacion () {
+function altaPresentacion (event) {
 	event.preventDefault();
 	const empresa = document.getElementById("altaNombreEmpresa");
 	const titulo = document.getElementById("altaPresentacionTitulo");
@@ -72,13 +73,66 @@ function altaPresentacion () {
 			cantidadMinutosReservados += presentacion.duracion;
 		}
 		
+		console.log(cantidadMinutosReservados, parseInt(duracion.value))
 		if((cantidadMinutosReservados + parseInt(duracion.value)) <= maxMinutosPorDia) {
 			sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, parseInt(dia.value), parseInt(duracion.value)));
 			titulo.value = "";
 			descripcion.value = "";
+			
+			actualizarTabla();
 		} else {
 			alert("No queda disponibilidad el dia " + dia.value + " para la duracion " + duracion.value);
 		}
+	}
+}
+
+function actualizarTabla() {
+	const presentaciones = sistema.listarPresentaciones();
+	
+	if(presentaciones.length > 0) {
+		const presentacionesOrdenadasPorDia = presentaciones.sort(function(a, b) {
+			return a.dia-b.dia;
+		});
+		const tbl = document.getElementById("tbl");
+		tbl.innerHTML = "";
+		const rowTitulos = document.createElement('tr');
+		
+		const celda = document.createElement('td');
+		celda.appendChild(document.createTextNode("Día y hora"));
+		rowTitulos.appendChild(celda);
+		
+		const celda2 = document.createElement('td');
+		celda2.appendChild(document.createTextNode("Presentación"));
+		rowTitulos.appendChild(celda2);
+		
+		tbl.appendChild(rowTitulos);
+		
+		let hora = 8;
+		let minutos = 0;
+		for(const presentacion of presentacionesOrdenadasPorDia) {
+			
+			const row2 = document.createElement('tr');
+			
+			const celdaDia = document.createElement('td');
+			celdaDia.appendChild(document.createTextNode(`${presentacion.dia} - ${hora}:${minutos}`));
+			row2.appendChild(celdaDia);
+			
+			const celdaTema = document.createElement('td');
+			celdaTema.appendChild(document.createTextNode(presentacion.titulo));
+			celdaTema.rowSpan = presentacion.duracion / 15;
+			row2.appendChild(celdaTema);
+			tbl.appendChild(row2);
+			
+			for(let i = 1; i < (presentacion.duracion / 15); i++) {
+				minutos = minutos + (i * 15);
+				const rowx = document.createElement('tr');
+				const celdax = document.createElement('td');
+				celdax.appendChild(document.createTextNode(`${presentacion.dia} - ${hora}:${minutos}`));
+				rowx.appendChild(celdax);
+				tbl.appendChild(rowx);
+			}
+		}
+		
 	}
 }
 
@@ -118,7 +172,6 @@ function buscarPresnetaciones(event) {
 
 
 function agregarEnLista(presentaciones) {
-	// título, descripción, tema, día y empresa
 	const ul = document.getElementById("resultadoBusqueda");
 	ul.innerHTML = "";
 	
