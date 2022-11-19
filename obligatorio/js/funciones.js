@@ -12,61 +12,62 @@ function inicio(){
 }
 
 function actualizarPantalla() {
-	actualizarEmpresasSelect();
 	actualizarTabla();
+	const empresas = sistema.listarEmpresas();
 	
-	const ulEmpresasReg = document.getElementById("empresasRegistradas");
-	ulEmpresasReg.innerHTML = "";
-	
-	const empresas = sistema.listarEmpresas()
-	
-	for(const empresa of empresas) {
-		const li = document.createElement("li");
-		li.innerHTML = empresa.nombre;
-		ulEmpresasReg.appendChild(li);
-	}
-	
-	const presentaciones = sistema.listarPresentaciones();
-	if(presentaciones.length > 0){
-		const pDurPromedio = document.getElementById("duracionPromedio");
+	if(empresas.length > 0) {
+		actualizarEmpresasSelect();
+		const ulEmpresasReg = document.getElementById("empresasRegistradas");
+		ulEmpresasReg.innerHTML = "";
 		
-		let max = 0;
-		for(const presentacion of presentaciones) {
-			max += presentacion.duracion;
+		for(const empresa of empresas) {
+			const li = document.createElement("li");
+			li.innerHTML = "<strong>Nombre: </strong>"  + empresa.nombre + "<strong> Dirección:</strong> "  + empresa.direccion + "<strong> Teléfono:</strong> " + empresa.telefono + "<strong> Origen: </strong>"  + empresa.origen;
+			ulEmpresasReg.appendChild(li);
 		}
-		pDurPromedio.innerText = Math.trunc(max / (presentaciones.length)) + " minutos";
 		
-		const ulEmpresaMaxCant = document.getElementById("empresaMaxCant");
-		ulEmpresaMaxCant.innerHTML = "";
-		let contador = 0;
-		for(let i = 0; i < empresas.length; i++) {
-			for (let j = 0; j < presentaciones.length; j++) {
-				if(presentaciones[j].empresa === empresas[i].nombre) {
-					contador++;
+		const presentaciones = sistema.listarPresentaciones();
+		if(presentaciones.length > 0){
+			const pDurPromedio = document.getElementById("duracionPromedio");
+			
+			let max = 0;
+			for(const presentacion of presentaciones) {
+				max += presentacion.duracion;
+			}
+			pDurPromedio.innerText = Math.trunc(max / (presentaciones.length)) + " minutos";
+			
+			const ulEmpresaMaxCant = document.getElementById("empresaMaxCant");
+			ulEmpresaMaxCant.innerHTML = "";
+			let contador = 0;
+			for(let i = 0; i < empresas.length; i++) {
+				for (let j = 0; j < presentaciones.length; j++) {
+					if(presentaciones[j].empresa === empresas[i].nombre) {
+						contador++;
+					}
 				}
+				
+				const li = document.createElement("li");
+				li.innerHTML = empresas[i].nombre + " - " + contador;
+				ulEmpresaMaxCant.appendChild(li);
+				contador = 0;
 			}
 			
-			const li = document.createElement("li");
-			li.innerHTML = empresas[i].nombre + " - " + contador;
-			ulEmpresaMaxCant.appendChild(li);
-			contador = 0;
-		}
-		
-		const ulTotalPorTipo = document.getElementById("totalPorTipo");
-		ulTotalPorTipo.innerHTML = "";
-		const temas = ["Inteligencia Artificial", "Big Data", "Mobile", "Redes", "Seguridad", "Hardware"];
-		for(let i = 0; i < temas.length; i++) {
-			for (let j = 0; j < presentaciones.length; j++) {
-				if(presentaciones[j].tema === temas[i]) {
-					contador++;
+			const ulTotalPorTipo = document.getElementById("totalPorTipo");
+			ulTotalPorTipo.innerHTML = "";
+			const temas = ["Inteligencia Artificial", "Big Data", "Mobile", "Redes", "Seguridad", "Hardware"];
+			for(let i = 0; i < temas.length; i++) {
+				for (let j = 0; j < presentaciones.length; j++) {
+					if(presentaciones[j].tema === temas[i]) {
+						contador++;
+					}
 				}
+				
+				const li = document.createElement("li");
+				li.innerHTML = temas[i] + " - " + contador;
+				ulTotalPorTipo.appendChild(li);
+				contador = 0;
 			}
-			
-			const li = document.createElement("li");
-			li.innerHTML = temas[i] + " - " + contador;
-			ulTotalPorTipo.appendChild(li);
-			contador = 0;
-		}
+		} 
 	}
 }
 
@@ -120,20 +121,23 @@ function altaPresentacion (event) {
 		alert("Ya existe una presentacion con ese titulo.");
 	} else {
 		
-		const presentacionesDelMismoDia = sistema.listarPresentacionesPorDia(parseInt(dia.value));
-		let cantidadMinutosReservados = 0;
-		for(const presentacion of presentacionesDelMismoDia) {
-			cantidadMinutosReservados += presentacion.duracion;
-		}
-		
-		console.log(cantidadMinutosReservados, duracion.value);
-		if((cantidadMinutosReservados + parseInt(duracion.value)) <= maxMinutosPorDia) {
-			sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, parseInt(dia.value), parseInt(duracion.value)));
-			actualizarPantalla();
-			titulo.value = "";
-			descripcion.value = "";
+		if(sistema.listarEmpresas().length > 0) {
+			const presentacionesDelMismoDia = sistema.listarPresentacionesPorDia(parseInt(dia.value));
+			let cantidadMinutosReservados = 0;
+			for(const presentacion of presentacionesDelMismoDia) {
+				cantidadMinutosReservados += presentacion.duracion;
+			}
+			
+			if((cantidadMinutosReservados + parseInt(duracion.value)) <= maxMinutosPorDia) {
+				sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, parseInt(dia.value), parseInt(duracion.value)));
+				actualizarPantalla();
+				titulo.value = "";
+				descripcion.value = "";
+			} else {
+				alert("No queda disponibilidad el dia " + dia.value + " para la duracion " + duracion.value);
+			}
 		} else {
-			alert("No queda disponibilidad el dia " + dia.value + " para la duracion " + duracion.value);
+			alert("Debe asignar una empresa para crear una presentacion.");
 		}
 	}
 }
@@ -200,13 +204,13 @@ function actualizarTabla() {
 			}
 
 			const rowx = tbl.insertRow();
-			rowx.classList.add(`dia${presentacion.dia}`);
+			rowx.classList.add("dia" + presentacion.dia);
 			const celdax = rowx.insertCell();
 			
 			if(minutos === 0) {
-				celdax.innerText = `${presentacion.dia} - ${hora}:${minutos}0`;
+				celdax.innerText = presentacion.dia + " - " + hora + ":" + minutos + "0";
 			} else {
-				celdax.innerText = `${presentacion.dia} - ${hora}:${minutos}`;
+				celdax.innerText = presentacion.dia + " - " + hora + ":" + minutos;
 			}
 		}
 	}
@@ -261,7 +265,7 @@ function agregarEnLista(presentaciones) {
 		
 		for(const presentacion of ordenadosPorDia){ 
 			const li = document.createElement("li");
-			li.innerHTML = ` <strong>Titulo:</strong> ${presentacion.titulo} - <strong>Descripcion:</strong> ${presentacion.descripcion} - <strong>Tema:</strong> ${presentacion.tema} - <strong>Dia:</strong> ${presentacion.dia} - <strong>Empresa:</strong> ${presentacion.empresa}`;
+			li.innerHTML = `<strong>Titulo:</strong> ${presentacion.titulo} - <strong>Descripcion:</strong> ${presentacion.descripcion} - <strong>Tema:</strong> ${presentacion.tema} - <strong>Dia:</strong> ${presentacion.dia} - <strong>Empresa:</strong> ${presentacion.empresa}`;
 			ul.appendChild(li);
 		}
 	} else {
