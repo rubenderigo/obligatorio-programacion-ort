@@ -6,6 +6,7 @@ const maxMinutosPorDia = 480;
 function inicio(){
 	sistema.agregarEmpresa(new Empresa("Globant", "Av. Italia 22", "092 231 123", "extranjera"));
 	sistema.agregarPresentacion(new Presentacion("Globant", "p5", "tema", "1era presentacion del dia 1 de 30 minutos", 1, 30));
+	sistema.agregarPresentacion(new Presentacion("Globant", "p6", "tema", "1era presentacion del dia 1 de 30 minutos", 1, 180));
 	//sistema.agregarPresentacion(new Presentacion("Globant", "p4", "press primero", "b", "2", "15"));
 	//sistema.agregarPresentacion(new Presentacion("Globant", "p3", "press primero", "a", "2", "15"));
 	//sistema.agregarPresentacion(new Presentacion("Globant", "p2", "press segunda segunda", "a", "3", "15"));
@@ -73,7 +74,6 @@ function altaPresentacion (event) {
 			cantidadMinutosReservados += presentacion.duracion;
 		}
 		
-		console.log(cantidadMinutosReservados, parseInt(duracion.value))
 		if((cantidadMinutosReservados + parseInt(duracion.value)) <= maxMinutosPorDia) {
 			sistema.agregarPresentacion(new Presentacion(empresa.value, titulo.value, descripcion.value, tema.value, parseInt(dia.value), parseInt(duracion.value)));
 			titulo.value = "";
@@ -88,51 +88,71 @@ function altaPresentacion (event) {
 
 function actualizarTabla() {
 	const presentaciones = sistema.listarPresentaciones();
+	const tbl = document.getElementById("tbl");
+	tbl.innerHTML = "";
 	
-	if(presentaciones.length > 0) {
-		const presentacionesOrdenadasPorDia = presentaciones.sort(function(a, b) {
-			return a.dia-b.dia;
-		});
-		const tbl = document.getElementById("tbl");
-		tbl.innerHTML = "";
-		const rowTitulos = document.createElement('tr');
+	const rowTitulo = tbl.insertRow();
+	let celda = rowTitulo.insertCell();
+	
+	if(presentaciones.length === 0) {
+		celda.innerText = "No hay presentaciones registradas";
+		return;
+	}
+	
+	celda.innerText = "Día y hora";
+	celda.style.width = "150px"
+	celda = rowTitulo.insertCell();
+	celda.innerText = "Presentación";
+	
+	const presentacionesOrdenadasPorDia = presentaciones.sort(function(a, b) {
+		return a.dia-b.dia;
+	});
 		
-		const celda = document.createElement('td');
-		celda.appendChild(document.createTextNode("Día y hora"));
-		rowTitulos.appendChild(celda);
-		
-		const celda2 = document.createElement('td');
-		celda2.appendChild(document.createTextNode("Presentación"));
-		rowTitulos.appendChild(celda2);
-		
-		tbl.appendChild(rowTitulos);
-		
-		let hora = 8;
-		let minutos = 0;
-		for(const presentacion of presentacionesOrdenadasPorDia) {
-			
-			const row2 = document.createElement('tr');
-			
-			const celdaDia = document.createElement('td');
-			celdaDia.appendChild(document.createTextNode(`${presentacion.dia} - ${hora}:${minutos}`));
-			row2.appendChild(celdaDia);
-			
-			const celdaTema = document.createElement('td');
-			celdaTema.appendChild(document.createTextNode(presentacion.titulo));
-			celdaTema.rowSpan = presentacion.duracion / 15;
-			row2.appendChild(celdaTema);
-			tbl.appendChild(row2);
-			
-			for(let i = 1; i < (presentacion.duracion / 15); i++) {
-				minutos = minutos + (i * 15);
-				const rowx = document.createElement('tr');
-				const celdax = document.createElement('td');
-				celdax.appendChild(document.createTextNode(`${presentacion.dia} - ${hora}:${minutos}`));
-				rowx.appendChild(celdax);
-				tbl.appendChild(rowx);
-			}
+	let hora = 8;
+	let minutos = 0;
+	let tituloActual = presentacionesOrdenadasPorDia[0].titulo;
+	let diaActual = 1;
+	for(const presentacion of presentacionesOrdenadasPorDia) {
+		if(diaActual !== presentacion.dia) {
+			hora = 8;
+			minutos = 0;
+			diaActual = presentacion.dia;
+		} else if(tituloActual !== presentacion.titulo) {
+			minutos += 15;
+			tituloActual = presentacion.titulo;
 		}
 		
+		const pres = tbl.insertRow();
+		pres.classList.add("dia" + presentacion.dia);
+			
+		const diaHora = pres.insertCell();
+		if(minutos === 0) {
+			diaHora.innerText = presentacion.dia + " - " + hora + ":" + minutos + "0";
+		} else {
+			diaHora.innerText = presentacion.dia + " - " + hora + ":" + minutos;
+		}
+		
+		const tema = pres.insertCell();
+		tema.innerText = presentacion.titulo;
+		tema.rowSpan = presentacion.duracion / 15;
+		
+		for(let i = 1; i < (presentacion.duracion / 15); i++) {
+			minutos = minutos + 15;
+			if(minutos === 60) {
+				hora++;
+				minutos = 0;
+			}
+
+			const rowx = tbl.insertRow();
+			rowx.classList.add(`dia${presentacion.dia}`);
+			const celdax = rowx.insertCell();
+			
+			if(minutos === 0) {
+				celdax.innerText = `${presentacion.dia} - ${hora}:${minutos}0`;
+			} else {
+				celdax.innerText = `${presentacion.dia} - ${hora}:${minutos}`;
+			}
+		}
 	}
 }
 
