@@ -6,7 +6,7 @@ const maxMinutosPorDia = 480;
 function inicio(){
 	document.getElementById("altaEmpresa").addEventListener("submit", altaEmpresa);
 	document.getElementById("altaPresentacion").addEventListener("submit", altaPresentacion);
-	document.getElementById("busquedaPresentaciones").addEventListener("submit", buscarPresnetaciones);
+	document.getElementById("busquedaPresentaciones").addEventListener("submit", buscarPresetaciones);
 	
 	actualizarPantalla()
 }
@@ -160,15 +160,20 @@ function actualizarTabla() {
 	celda = rowTitulo.insertCell();
 	celda.innerText = "Presentación";
 	
-	const presentacionesOrdenadasPorDia = presentaciones.sort(function(a, b) {
+	
+	const ordenadosPorTema = presentaciones.sort(function (a, b) {
+		return a.titulo.localeCompare(b.titulo);
+	});
+		
+	const ordenadosPorDia = ordenadosPorTema.sort(function (a, b) {
 		return a.dia-b.dia;
 	});
 		
 	let hora = 8;
 	let minutos = 0;
-	let tituloActual = presentacionesOrdenadasPorDia[0].titulo;
-	let diaActual = presentacionesOrdenadasPorDia[0].dia;
-	for(const presentacion of presentacionesOrdenadasPorDia) {
+	let tituloActual = ordenadosPorDia[0].titulo;
+	let diaActual = ordenadosPorDia[0].dia;
+	for(const presentacion of ordenadosPorDia) {
 		if(diaActual !== presentacion.dia) {
 			hora = 8;
 			minutos = 0;
@@ -216,7 +221,7 @@ function actualizarTabla() {
 	}
 }
 
-function buscarPresnetaciones(event) {
+function buscarPresetaciones(event) {
 	event.preventDefault();
 	const contieneTodasCheck = document.getElementById("contieneTodasBuscar");
 	const palabrasBuscadas = document.getElementById("busquedaEnDescripcion").value.trim().toLowerCase();
@@ -239,7 +244,7 @@ function buscarPresnetaciones(event) {
 		} else {
 			const palabras = palabrasBuscadas.split(" ").filter((palabra) => palabra !== ""); 
 			for(const palabra of palabras) {
-				if(presentacion.descripcion.includes(palabra)) {
+				if((presentacion.descripcion.toLowerCase()).includes(palabra)) {
 					presentaciones.push(presentacion)
 					break;
 				}
@@ -257,7 +262,7 @@ function agregarEnLista(presentaciones) {
 	
 	if(presentaciones.length > 0) {
 		const ordenadosPorTema = presentaciones.sort(function (a, b) {
-			return a.tema.localeCompare(b.tema);
+			return a.titulo.localeCompare(b.titulo);
 		});
 		const ordenadosPorDia = ordenadosPorTema.sort(function (a, b) {
 			return a.dia-b.dia;
